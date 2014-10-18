@@ -37,20 +37,33 @@ class GifTool{
 
 	}
 
-	function to_gif($start=25.000,$stop=30.000,$quality='low'){
+	function to_gif($start=25.000,$stop=30.000,$quality='low',$scale=""){
 		if($stop < $start)
 			throw new Exception("Stop point is prior to start point");
 		
+
 		$duration = $stop-$start;
 		$id = uniqid();
 		if($quality === 'low'){
-			$cmd="ffmpeg -v quiet -ss ".$start." -i ".$this->videos_source.$this->source." -vf scale=320:-1 -t ".$duration." -r 10 ".$this->video_gifs_path.$id.".gif";
+			$cmd="ffmpeg -v quiet -ss ".$start." -i ".$this->videos_source.$this->source." ".$scale." -t ".$duration." -r 10 ".$this->video_gifs_path.$id.".gif";
 			exec($cmd,$output,$exit);
 			if($exit != 0)
 				throw new Exception("Error Processing Request $cmd", 1);
 		}
 		elseif($quality === 'medium'){
-			$cmd = "ffmpeg -i input -vf scale=320:-1 -r 10 frames/ffout%03d.png";
+			if(!is_dir($this->videos_frames.$id)){
+				mkdir($this->videos_frames.$id,0775,true);
+				if(!is_dir($this->videos_frames.$id))
+					throw new Exception("Error Processing Request", 1);
+			}
+			$cmd = "ffmpeg -v quiet -ss ".$start." -i ".$this->videos_source.$this->source." ".$scale." -t ".$duration." -r 40 ".$this->videos_frames.$id."/ffout%03d.png";
+			exec($cmd,$output,$exit);
+			if($exit != 0)
+				throw new Exception("Error Processing Request $cmd", 1);
+			$cmd = "convert -delay 5 -loop 0 ".$this->videos_frames.$id."/ffout*.png ".$this->video_gifs_path.$id.".gif";
+			exec($cmd,$output,$exit);
+			if($exit != 0)
+				throw new Exception("Error Processing Request $cmd", 1);
 		}
 		return $id;
 	}
@@ -67,10 +80,12 @@ class GifTool{
 								$ffprobe='/usr/local/bin/ffprobe',
 								$videos_path='/Users/Mousline/Desktop/videos/',
 								$videos_source='/Users/Mousline/Desktop/videos/sources/',
+								$videos_frames='/Users/Mousline/Desktop/videos/frames/',
 								$ffmpeg_path='/usr/local/bin/ffmpeg'){
 		$this->source = $source;
 		$this->ffprobe = $ffprobe;
 		$this->videos_path=$videos_path;
+		$this->videos_frames=$videos_frames;
 		$this->videos_source=$videos_source;
 	//path to ffmpeg executable
 		$this->ffmpeg_path=$ffmpeg_path;
@@ -94,18 +109,23 @@ class GifTool{
 		if ( ! is_dir( $this->video_thumbnails_path )){
 			mkdir ($this->video_thumbnails_path,0775,true);
 			if ( ! is_dir( $this->video_thumbnails_path ))
-				throw new Exception("could not create $this->videos_thumbnails_path");
+				throw new Exception("could not create $this->video_thumbnails_path");
 		}
 		
 		if ( ! is_dir( $this->video_mute_path )){
 			mkdir ($this->video_mute_path,0775,true);
 			if ( ! is_dir( $this->video_mute_path ) )
-				throw new Exception("could not create $this->videos_mute_path");
+				throw new Exception("could not create $this->video_mute_path");
 		}
 		if ( ! is_dir( $this->video_gifs_path )){
 			mkdir ($this->video_gifs_path,0775,true);
 			if ( ! is_dir( $this->video_gifs_path ) )
-				throw new Exception("could not create $this->videos_gifs_path");
+				throw new Exception("could not create $this->video_gifs_path");
+		}
+		if ( ! is_dir( $this->videos_frames )){
+			mkdir ($this->videos_frames,0775,true);
+			if ( ! is_dir( $this->videos_frames ) )
+				throw new Exception("could not create $this->videos_frames");
 		}
 	}
 
@@ -114,9 +134,10 @@ class GifTool{
 $source = "hashtag.avi";
 $myvid = new GifTool($source);
 //$myvid->to_thumbnails();
-$myvid->to_gif(35.000,40.000);
-$myvid->to_gif();
 $myvid->to_gif(135.000,140.000);
+$myvid->to_gif(135.000,140.000,'medium');
+$myvid->to_gif(135.000,140.000,'medium',"-vf scale=320:-1");
+
 
 
 ?>
