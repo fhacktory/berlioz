@@ -15,7 +15,7 @@ class GifTool{
 
 
 	function parse_video_info (){
-		$cmd = $this->ffprobe.$this->verbose." -print_format json -show_format ".$this->videos_source.$this->source;
+		$cmd = $this->ffprobe." -print_format json -show_format ".$this->videos_source.$this->source;
 		$string = exec($cmd, $output, $exit);
 		if($exit != 0)
 			throw new Exception("Invalid exit code for: $cmd");
@@ -25,7 +25,6 @@ class GifTool{
 
 	function to_thumbnails (){
 		if(! is_dir($this->video_thumbnails_path)){
-			echo $this->video_thumbnails_path;
 			mkdir($this->video_thumbnails_path,0775,true);
 			if(! is_dir($this->video_thumbnails_path))
 				throw new Exception("could not create thumbnail path $this->video_thumbnails_path for video $this->infos['format']['filename']");
@@ -83,17 +82,61 @@ class GifTool{
 		
 	}
 
+	function get_key_frames(){
+		$cmd = $this->ffprobe." -show_frames -select_streams v -i ".$this->videos_source.$this->source." -print_format json | "."grep -A6 '\"key_frame\": 1,' | grep best_effort_timestamp_time >".$this->json_key_frames;
+		//"| grep 'best_effort_timestamp\"' | "."awk '{$1 = \"\"; print $2;}' | sed 's\/,$\/\/' > ".;
+		exec($cmd,$output,$exit);
+		if($exit != 0)
+			throw new Exception("Invalid exit code for: $cmd");
+
+	}
+
+	function link_thumbs_with_key_frames(){
+		try{
+			if(!file_exists($this->json_key_frames))
+				throw new Exception("Error Processing Request", 1);
+		}
+		catch(Exception $e){
+			echo "error $e";
+			return 0;
+		}
+
+//		$json_raw = implode("\n", $output);
+
+		$myfile = fopen("$this->json_key_frames", "r") or die("Unable to open file!");
+		// Output one line until end-of-file
+		$i = 1;
+		while(!feof($myfile)) {
+			$line = fgets($myfile);
+			if(preg_match('/best_effort_timestamp_time/',$line)){
+				$time = substr($line,43,-10);
+				//echo $line."\n";
+				//echo $time."\n";
+				//echo "rename(".$this->video_thumbnails_path.sprintf('thumb%04d.jpg',$i).",".$this->video_thumbnails_path.$time.".jpg)\n";
+				rename($this->video_thumbnails_path.sprintf('thumb%04d.jpg',$i),$this->video_thumbnails_path.$time.'.jpg');
+			}
+			$i++;
+		}
+		fclose($myfile);
+/*		$content = file_get_contents($this->json_key_frames);
+		$frames = json_decode($content, true);
+		$i = 0;
+		foreach($frames as $frame){
+			if($frame['key_frame']){
+				rename($this->video_thumbnails_path.sprintf('thumb%04d.jpg',$i),$this->video_thumbnails_path.round($frame['best_effort_timestamp']/100));
+			}
+		}*/
+	}
+
 	public function __construct($source,
-								$ffmpeg='/usr/local/bin/ffmpeg',
 								$ffprobe='/usr/local/bin/ffprobe',
 								$videos_path='./videos/',
 								$videos_source='./videos/sources/',
-								$videos_frames='./videos/frames/',
-								$verbose=0){
+								$ffmpeg='/usr/local/bin/ffmpeg',
+								$verbose=1){
 		$this->source = $source;
 		$this->ffprobe = $ffprobe;
 		$this->videos_path= $videos_path;
-		$this->videos_frames= $videos_frames;
 		$this->videos_source= $videos_source;
 		if($verbose)
 			$this->verbose = " -v quiet ";
@@ -102,10 +145,9 @@ class GifTool{
 	//path to ffmpeg executable
 		$this->ffmpeg=$ffmpeg;
 
-		$this->basename_video=pathinfo($source,PATHINFO_FILENAME);
 		try{
-			if ( ! file_exists($this->videos_source.$this->source) ) {
-				throw new Exception("source file does not exist:".$this->videos_source.$this->source);
+			if ( ! file_exists($this->videos_source.$this->basename_video) ) {
+				throw new Exception("source file does not exist:".$this->source);
 			}
 		}
 		catch(Exception $e){
@@ -114,10 +156,13 @@ class GifTool{
 		}
 
 		$this->parse_video_info($ffprobe,$source);
+
+		$this->basename_video=pathinfo($source,PATHINFO_FILENAME);
 		$this->video_thumbnails_path=$this->videos_path.$this->basename_video.'/thumbnails/';
 		$this->video_mute_path=$this->videos_path.$this->basename_video.'/mute/';
 		$this->video_gifs_path=$this->videos_path.$this->basename_video.'/gifs/';
-		
+		$this->video_frames_path=$this->videos_path.$this->basename_video.'/frames/';
+		$this->json_key_frames = $this->video_frames_path.$this->basename_video.".json";
 
 		try{
 			if ( !is_dir( $this->videos_path )){
@@ -142,10 +187,10 @@ class GifTool{
 				if ( ! is_dir( $this->video_gifs_path ) )
 					throw new Exception("could not create $this->video_gifs_path");
 			}
-			if ( ! is_dir( $this->videos_frames )){
-				mkdir ($this->videos_frames,0775,true);
-				if ( ! is_dir( $this->videos_frames ) )
-					throw new Exception("could not create $this->videos_frames");
+			if ( ! is_dir( $this->video_frames_path )){
+				mkdir ($this->video_frames_path,0775,true);
+				if ( ! is_dir( $this->video_frames_path ) )
+					throw new Exception("could not create $this->video_frames_path");
 			}
 		}
 		catch(Exception $e){
@@ -156,12 +201,12 @@ class GifTool{
 
 }
 
-//$source = "hashtag.avi";
-//$myvid = new GifTool($source);
+#$source = "hashtag.avi";
+#$myvid = new GifTool($source);
 //$myvid->to_thumbnails();
 //$myvid->to_mute();
 //$myvid->to_gif(135.000,140.000);
-//$myvid->to_gif(135.000,140.000,'high');
+#$myvid->to_gif(135.000,140.000,'high');
 //$myvid->to_gif(135.000,140.000,'medium',"-vf scale=320:-1");
 
 
