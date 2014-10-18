@@ -1,7 +1,7 @@
 <?php
 
 define('BERLIOZ_SECRET', 'DUCHESSEFTW');
-define('BERLIOZ_HOST', 'berlioz.gareste.fr');
+define('BERLIOZ_HOST', 'data.trolls.cat');
 
 function build_secure_url($path, $expires_in=60){
   // Set expiration timestamp
