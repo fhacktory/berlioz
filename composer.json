@@ -1,0 +1,9 @@
+{
+    "name": "duchesse/berlioz",
+    "description": "Make gifs out of movies.",
+    "autoload": {
+        "classmap": [
+            "berlioz.php"
+        ]
+    }
+}
