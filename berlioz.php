@@ -2,8 +2,7 @@
 
 class GifTool
 {
-	// Berlioz toolbox
-
+    protected $scale = '-vf scale="320:trunc(ow/a/2)*2"';
 
 	function help (){
 		echo "Usage: berlioz video_file operation";
@@ -27,7 +26,7 @@ class GifTool
 			if(! is_dir($this->video_thumbnails_path))
 				throw new Exception("could not create thumbnail path $this->video_thumbnails_path for video $this->infos['format']['filename']");
 		}
-		$cmd = $this->ffmpeg.$this->verbose." -i ".$this->infos['format']['filename']." -f image2 -threads 0 -vf scale=320:-1 -vf \"select='eq(pict_type,PICT_TYPE_I)'\" -vsync vfr ".$this->video_thumbnails_path."thumb%04d.jpg";
+		$cmd = $this->ffmpeg.$this->verbose." -i ".$this->infos['format']['filename']." -f image2 -threads 0 {$this->scale} -vf \"select='eq(pict_type,PICT_TYPE_I)'\" -vsync vfr ".$this->video_thumbnails_path."thumb%04d.jpg";
 		exec ($cmd,$output,$exit);
 		if($exit != 0)
 			throw new Exception("Invalid exit code for: $cmd");
@@ -134,7 +133,7 @@ class GifTool
             $this->ffmpeg
             . $this->verbose
             . '  -i ' . $this->videos_source.$this->source
-            . '  -vf scale="320:trunc(ow/a/2)*2" -c:v libx264 -crf 20 -an  '
+            . ' ' . $this->scale . ' -c:v libx264 -crf 20 -an  '
             . "$dest.tmp"
         ;
 		exec($cmd,$output,$exit);
