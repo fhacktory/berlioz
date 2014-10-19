@@ -13,7 +13,7 @@ class GifTool
 
 
 	function parse_video_info (){
-		$cmd = $this->ffprobe." -print_format json -show_format ".$this->videos_source.$this->source;
+		$cmd = $this->ffprobe." -print_format json -show_format -show_streams ".$this->videos_source.$this->source;
 		$string = exec($cmd, $output, $exit);
 		if($exit != 0)
 			throw new Exception("Invalid exit code for: $cmd");
@@ -27,7 +27,8 @@ class GifTool
 			if(! is_dir($this->video_thumbnails_path))
 				throw new Exception("could not create thumbnail path $this->video_thumbnails_path for video $this->infos['format']['filename']");
 		}
-		$cmd = $this->ffmpeg.$this->verbose." -i ".$this->infos['format']['filename']." -f image2 -vf \"select='eq(pict_type,PICT_TYPE_I)'\" -vsync vfr ".$this->video_thumbnails_path."/thumb%04d.jpg";
+		$cmd = $this->ffmpeg.$this->verbose." -i ".$this->infos['format']['filename']." -f image2 -threads 0 -vf scale=320:-1 -vf \"select='eq(pict_type,PICT_TYPE_I)'\" -vsync vfr ".$this->video_thumbnails_path."thumb%04d.jpg";
+		echo $cmd;
 		exec ($cmd,$output,$exit);
 		if($exit != 0)
 			throw new Exception("Invalid exit code for: $cmd");
@@ -53,7 +54,7 @@ class GifTool
 				if(!is_dir($this->videos_frames.$id))
 					throw new Exception("Error Processing Request", 1);
 			}
-			$cmd = $this->ffmpeg.$this->verbose." -ss ".$start." -i ".$this->videos_source.$this->source." ".$scale." -t ".$duration." -r 25 ".$this->videos_frames.$id."/ffout%03d.jpg";
+			$cmd = $this->ffmpeg.$this->verbose." -ss ".$start." -i ".$this->videos_source.$this->source." ".$scale." -t ".$duration." -r 25 ".$this->videos_frames.$id."/fclose(handle)fout%03d.jpg";
 			exec($cmd,$output,$exit);
 			if($exit != 0)
 				throw new Exception("Error Processing Request $cmd", 1);
@@ -70,6 +71,45 @@ class GifTool
 				throw new Exception("Error Processing Request $cmd", 1);
 		}*/
 		return $id;
+	}
+
+	function transparent_frame($text="",$position="bottom"){
+		echo $this->infos['streams'][0]['width']."\n";
+
+
+
+		$image = imagecreatetruecolor($this->infos['streams'][0]['width'], $this->infos['streams'][0]['height']);
+
+		$font = "arial.ttf";
+		$fw = imagefontwidth(5);     // width of a character
+		$font_size = 36;
+		$l = strlen($text);          // number of characters
+		$tw = $l*$font_size;              // text width
+		$xpos = ($this->infos['streams'][0]['width'] - $tw)/2;
+		$ypos = 30;
+		if($position === 'bottom'){
+			$ypos = $this->infos['streams'][0]['height'] -$ypos;
+		}
+
+		imagealphablending($image, true);
+		imagesavealpha($image, true);
+
+		$xi = imagesx($image);
+	    $yi = imagesy($image);
+		$box = imagettfbbox($font_size,$angle,$font,$text);	
+		$xr = abs(max($box[2], $box[4]));
+	    $x = intval(($xi - $xr) / 2);
+	    $y = $ypos - 10;
+		$text_color = imagecolorallocate($image, 255, 255, 255);
+		imagefill($image,0,0,0x7fff0000);
+
+		$white = imagecolorallocate($image, 255,255,255);
+
+		imagettftext($image, $font_size, 0, $x, $y, $white, $font, $text);
+
+		header('content-type: image/png');
+		imagepng($image,$this->videos_path.$this->basename_video."/transparent.png");
+		imagedestroy($image);
 	}
 
 	function mplayer_convert(){
