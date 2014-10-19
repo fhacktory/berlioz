@@ -73,7 +73,6 @@ class GifTool
 	}
 
 	function mplayer_convert(){
-		echo "hello".$this->infos['format']['duration']."goodbye\n\n";
 		$cmd = "mplayer -vo jpeg -sstep 5 -endpos ".round($this->infos['format']['duration'])." ".$this->videos_source.$this->source;
 
         $cwd = getcwd();
@@ -106,8 +105,7 @@ class GifTool
 	}
 
 	function get_key_frames(){
-		$cmd = $this->ffprobe." -show_frames -select_streams v -i ".$this->videos_source.$this->source." -print_format json | "."grep -A6 '\"key_frame\": 1,' | grep best_effort_timestamp_time >".$this->json_key_frames;
-		//"| grep 'best_effort_timestamp\"' | "."awk '{$1 = \"\"; print $2;}' | sed 's\/,$\/\/' > ".;
+		$cmd = $this->ffprobe." {$this->verbose} -show_frames -select_streams v -i ".$this->videos_source.$this->source." -print_format json | "."grep -A6 '\"key_frame\": 1,' | grep best_effort_timestamp_time >".$this->json_key_frames;
 		exec($cmd,$output,$exit);
 		if($exit != 0)
 			throw new Exception("Invalid exit code for: $cmd");
