@@ -66,12 +66,15 @@ class GifTool
 			exec($cmd,$output,$exit);
 			if($exit != 0)
 				throw new Exception("Error Processing Request $cmd", 1);
-			$watermark = $this->videos_path.$this->basename_video."/transparent.png";
-			$watermarked_animation = $this->video_gifs_path.$id.".gif";
-			$cmd = " -delay 5 -loop 0 ".$this->video_gifs_path.$id.".gif"." -coalesce -gravity South "." -geometry +0+0 null: $watermark -layers composite -layers optimize ";
-			exec("convert $cmd $watermarked_animation ",$output,$exit); 
-			if($exit != 0)
-				throw new Exception("Error Processing Request $cmd", 1);
+			if($text){
+				$this->transparent_frame($text);
+				$watermark = $this->videos_path.$this->basename_video."/transparent.png";
+				$watermarked_animation = $this->video_gifs_path.$id.".gif";
+				$cmd = " -delay 5 -loop 0 ".$this->video_gifs_path.$id.".gif"." -coalesce -gravity South "." -geometry +0+0 null: $watermark -layers composite -layers optimize ";
+				exec("convert $cmd $watermarked_animation ",$output,$exit); 
+				if($exit != 0)
+					throw new Exception("Error Processing Request $cmd", 1);
+				}
 		}
 
 		/*if($quality === 'high'){
