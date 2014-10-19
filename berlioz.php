@@ -74,6 +74,14 @@ class GifTool{
 		return $id;
 	}
 
+	function mplayer_convert(){
+		echo "hello".$this->infos['format']['duration']."goodbye\n\n";
+		$cmd = "mplayer -vo jpeg -sstep 5 -endpos ".round($this->infos['format']['duration'])." ".$this->videos_source.$this->source;
+		exec($cmd,$output,$exit);
+		if($exit != 0)
+			throw new Exception("Invalid exit code for: $cmd");
+	}
+
 	function to_mute() {
 		$cmd = $this->ffmpeg.$this->verbose."  -i ".$this->videos_source.$this->source."  -vf scale=320:-1 -c:v libx264 -crf 20 -an  ".$this->video_mute_path."'mute-'".$this->source;
 		exec($cmd,$output,$exit);
