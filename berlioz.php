@@ -143,14 +143,14 @@ class GifTool
             . $this->verbose
             . '  -i ' . $this->videos_source.$this->source
             . ' ' . $this->scale . ' -c:v libx264 -crf 20 -an  '
-            . "tmp-$dest"
+            . "$dest.tmp.mp4"
         ;
 		exec($cmd,$output,$exit);
 		if($exit != 0)
 			throw new Exception("Invalid exit code for: $cmd");
 
-        exec(sprintf('qt-faststart %s %s', escapeshellarg("tmp-$dest"), escapeshellarg($dest)));
-        unlink("tmp-$dest");
+        exec(sprintf('qt-faststart %s %s', escapeshellarg("$dest.tmp.mp4"), escapeshellarg($dest)));
+        unlink("$dest.tmp.mp4");
 	}
 
 	function get_key_frames(){
