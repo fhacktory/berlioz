@@ -89,7 +89,8 @@ class GifTool
 	function transparent_frame($text="",$position="bottom"){
 		$image = imagecreatetruecolor($this->infos['streams'][0]['width'], $this->infos['streams'][0]['height']);
 
-		$font = "arial.ttf";
+		$font = '/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans.ttf';
+
 		$fw = imagefontwidth(5);     // width of a character
 		$font_size = 36;
 		$l = strlen($text);          // number of characters
@@ -105,7 +106,7 @@ class GifTool
 
 		$xi = imagesx($image);
 	    $yi = imagesy($image);
-		$box = imagettfbbox($font_size,$angle,$font,$text);	
+		$box = imagettfbbox($font_size,0,$font,$text);	
 		$xr = abs(max($box[2], $box[4]));
 	    $x = intval(($xi - $xr) / 2);
 	    $y = $ypos - 10;
