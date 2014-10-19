@@ -63,16 +63,12 @@ class GifTool
 			if($exit != 0)
 				throw new Exception("Error Processing Request $cmd", 1);
 			$cmd = "convert -delay 5 -loop 0 ".$this->video_frames_path.$id."/fout*.jpg ".$this->video_gifs_path.$id.".gif";
-			echo $cmd."\n";
 			exec($cmd,$output,$exit);
-			echo "hola\n\n\n";
 			if($exit != 0)
 				throw new Exception("Error Processing Request $cmd", 1);
 			$watermark = $this->videos_path.$this->basename_video."/transparent.png";
 			$watermarked_animation = $this->video_gifs_path.$id.".gif";
-			echo "hello\n\n\n";
 			$cmd = " -delay 5 -loop 0 ".$this->video_gifs_path.$id.".gif"." -coalesce -gravity South "." -geometry +0+0 null: $watermark -layers composite -layers optimize ";
-			echo $cmd."\n\n\n\n\n";
 			exec("convert $cmd $watermarked_animation ",$output,$exit); 
 			if($exit != 0)
 				throw new Exception("Error Processing Request $cmd", 1);
