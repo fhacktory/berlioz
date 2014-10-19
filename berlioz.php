@@ -1,9 +1,7 @@
 <?php
 
-
-
-
-class GifTool{
+class GifTool
+{
 	// Berlioz toolbox
 
 
@@ -77,8 +75,15 @@ class GifTool{
 	function mplayer_convert(){
 		echo "hello".$this->infos['format']['duration']."goodbye\n\n";
 		$cmd = "mplayer -vo jpeg -sstep 5 -endpos ".round($this->infos['format']['duration'])." ".$this->videos_source.$this->source;
+
+        $cwd = getcwd();
+        chdir($this->video_thumbnails_path);
+
 		exec($cmd,$output,$exit);
-		if($exit != 0)
+
+        chdir($cwd);
+
+		if($exit !== 0)
 			throw new Exception("Invalid exit code for: $cmd");
 	}
 
@@ -216,7 +221,3 @@ class GifTool{
 //$myvid->to_gif(135.000,140.000);
 #$myvid->to_gif(135.000,140.000,'high');
 //$myvid->to_gif(135.000,140.000,'medium',"-vf scale=320:-1");
-
-
-
-?>
