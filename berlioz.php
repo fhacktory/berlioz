@@ -95,7 +95,7 @@ class GifTool
             $this->ffmpeg
             . $this->verbose
             . '  -i ' . $this->videos_source.$this->source
-            . '  -vf scale=320:-1 -c:v libx264 -crf 20 -an  '
+            . '  -vf scale="320:trunc(ow/a/2)*2" -c:v libx264 -crf 20 -an  '
             . $dest
         ;
 		exec($cmd,$output,$exit);
