@@ -58,14 +58,14 @@ class GifTool
 				if(!is_dir($this->video_frames_path.$id))
 					throw new Exception("Error Processing Request", 1);
 			}
-			$cmd = $this->ffmpeg.$this->verbose." -ss ".$start." -i ".$this->videos_source.$this->source." ".$scale." -t ".$duration." -r 25 ".$this->video_frames_path.$id."/fout%03d.jpg";
+			$cmd = $this->ffmpeg.$this->verbose." -ss ".$start." -i ".$this->videos_source.$this->source." ".$scale." -t ".$duration." -r 25 ".$this->video_frames_path.$id.".gif";
 			exec($cmd,$output,$exit);
 			if($exit != 0)
 				throw new Exception("Error Processing Request $cmd", 1);
-			$cmd = "convert -delay 5 -loop 0 ".$this->video_frames_path.$id."/fout*.jpg ".$this->video_gifs_path.$id.".gif";
+/*			$cmd = "convert -delay 5 -loop 0 ".$this->video_frames_path.$id."/fout*.jpg ".$this->video_gifs_path.$id.".gif";
 			exec($cmd,$output,$exit);
 			if($exit != 0)
-				throw new Exception("Error Processing Request $cmd", 1);
+				throw new Exception("Error Processing Request $cmd", 1);*/
 			if($text){
 				$this->transparent_frame($text);
 				$watermark = $this->videos_path.$this->basename_video."/transparent.png";
@@ -89,7 +89,7 @@ class GifTool
 	function transparent_frame($text="",$position="bottom"){
 		$image = imagecreatetruecolor($this->infos['streams'][0]['width'], $this->infos['streams'][0]['height']);
 
-		$font = '/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans.ttf';
+		$font = 'arial.ttf';
 
 		$fw = imagefontwidth(5);     // width of a character
 		$font_size = 36;
@@ -198,23 +198,29 @@ class GifTool
 		}*/
 	}
 
+	public function get_config(){
+		$myfile = fopen("config", "r") or die("Unable to open file!");
+		while(!feof($myfile)) {
+		  list($key,$value) = explode('=',fgets($myfile));
+		  if(!empty($key)){
+		  	$this->{$key} = trim($value);
+		  }
+		}
+		fclose($myfile);
+	}
+
 	public function __construct($source,
-								$ffprobe='/usr/local/bin/ffprobe',
-								$videos_path='./videos/',
-								$videos_source='./videos/sources/',
-								$ffmpeg='/usr/local/bin/ffmpeg',
 								$verbose=1){
 		$this->source = $source;
-		$this->ffprobe = $ffprobe;
-		$this->videos_path= $videos_path;
-		$this->videos_source= $videos_source;
+
+		$this->get_config();
 		if(!$verbose)
 			$this->verbose = " -v quiet ";
 		else
 			$this->verbose = "";
 	//path to ffmpeg executable
 		$this->ffmpeg=$ffmpeg;
-
+echo $this->videos_source.$this->source."\n";
 		$this->basename_video=pathinfo($source,PATHINFO_FILENAME);
 		try{
 			if ( ! file_exists($this->videos_source.$this->source) ) {

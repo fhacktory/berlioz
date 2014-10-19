@@ -1,0 +1,5 @@
+ffmpeg=/usr/local/bin/ffmpeg
+ffprobe=/usr/local/bin/ffprobe
+videos_path=/Users/Mousline/Desktop/berlioz/videos/
+videos_source=/Users/Mousline/Desktop/berlioz/videos/sources/
+font=/Users/Mousline/Desktop/berlioz/arial.ttf
