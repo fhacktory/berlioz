@@ -36,9 +36,9 @@ class GifTool
 
 	function to_gif($start=25.000,$stop=30.000,$text="",$quality='low') {
         $id = sha1(json_encode(compact('start', 'stop', 'text', 'quality')));
+        $scale = '';
         if(file_exists($this->video_gifs_path.$id.'.gif'))
             return $this->video_gifs_path.$id.'.gif';
-        $scale = $this->scaleGif;
 
 		if($stop < $start)
 			throw new Exception("Stop point is prior to start point");
@@ -55,6 +55,7 @@ class GifTool
 				throw new Exception("Error Processing Request $cmd", 1);
 		}
 		elseif($quality === 'medium'){
+            $scale = $this->scaleGif;
 			if(!is_dir($this->video_frames_path.$id)){
 				mkdir($this->video_frames_path.$id,0775,true);
 				if(!is_dir($this->video_frames_path.$id))
