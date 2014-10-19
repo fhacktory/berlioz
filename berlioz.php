@@ -33,31 +33,44 @@ class GifTool
 
 	}
 
-	function to_gif($start=25.000,$stop=30.000,$quality='low',$scale=""){
+	function to_gif($start=25.000,$stop=30.000,$text="",$quality='low',$scale=""){
 		if($stop < $start)
 			throw new Exception("Stop point is prior to start point");
-		
-
+		$overlay = "";
+		if($text != ""){
+			$this->transparent_frame($text);
+			$overlay = " -i ".$this->videos_path.$this->basename_video."/transparent.png -filter_complex 'overlay=0:0' ";
+		}
 		$duration = $stop-$start;
 		$id = uniqid();
 		if($quality === 'low'){
-			$cmd=$this->ffmpeg.$this->verbose." -ss ".$start." -i ".$this->videos_source.$this->source." ".$scale." -t ".$duration." -r 10 ".$this->video_gifs_path.$id.".gif";
+			$cmd=$this->ffmpeg.$this->verbose." -ss ".$start."  -i ".$this->videos_source.$this->source." ".$overlay." ".$scale." -t ".$duration." -r 10 ".$this->video_gifs_path.$id.".gif";
 			exec($cmd,$output,$exit);
 			if($exit != 0)
 				throw new Exception("Error Processing Request $cmd", 1);
 		}
 		elseif($quality === 'medium'){
-			if(!is_dir($this->videos_frames.$id)){
-				mkdir($this->videos_frames.$id,0775,true);
-				if(!is_dir($this->videos_frames.$id))
+			if(!is_dir($this->video_frames_path.$id)){
+				mkdir($this->video_frames_path.$id,0775,true);
+				if(!is_dir($this->video_frames_path.$id))
 					throw new Exception("Error Processing Request", 1);
 			}
-			$cmd = $this->ffmpeg.$this->verbose." -ss ".$start." -i ".$this->videos_source.$this->source." ".$scale." -t ".$duration." -r 25 ".$this->videos_frames.$id."/fclose(handle)fout%03d.jpg";
+			$cmd = $this->ffmpeg.$this->verbose." -ss ".$start." -i ".$this->videos_source.$this->source." ".$scale." -t ".$duration." -r 25 ".$this->video_frames_path.$id."/fout%03d.jpg";
 			exec($cmd,$output,$exit);
 			if($exit != 0)
 				throw new Exception("Error Processing Request $cmd", 1);
-			$cmd = "convert -delay 5 -loop 0 ".$this->videos_frames.$id."/ffout*.jpg ".$this->video_gifs_path.$id.".gif";
+			$cmd = "convert -delay 5 -loop 0 ".$this->video_frames_path.$id."/fout*.jpg ".$this->video_gifs_path.$id.".gif";
+			echo $cmd."\n";
 			exec($cmd,$output,$exit);
+			echo "hola\n\n\n";
+			if($exit != 0)
+				throw new Exception("Error Processing Request $cmd", 1);
+			$watermark = $this->videos_path.$this->basename_video."/transparent.png";
+			$watermarked_animation = $this->video_gifs_path.$id.".gif";
+			echo "hello\n\n\n";
+			$cmd = " -delay 5 -loop 0 ".$this->video_gifs_path.$id.".gif"." -coalesce -gravity South "." -geometry +0+0 null: $watermark -layers composite -layers optimize ";
+			echo $cmd."\n\n\n\n\n";
+			exec("convert $cmd $watermarked_animation ",$output,$exit); 
 			if($exit != 0)
 				throw new Exception("Error Processing Request $cmd", 1);
 		}
@@ -72,10 +85,6 @@ class GifTool
 	}
 
 	function transparent_frame($text="",$position="bottom"){
-		echo $this->infos['streams'][0]['width']."\n";
-
-
-
 		$image = imagecreatetruecolor($this->infos['streams'][0]['width'], $this->infos['streams'][0]['height']);
 
 		$font = "arial.ttf";
@@ -171,9 +180,6 @@ class GifTool
 			$line = fgets($myfile);
 			if(preg_match('/best_effort_timestamp_time/',$line)){
 				$time = substr($line,43,-10);
-				//echo $line."\n";
-				//echo $time."\n";
-				//echo "rename(".$this->video_thumbnails_path.sprintf('thumb%04d.jpg',$i).",".$this->video_thumbnails_path.$time.".jpg)\n";
 				rename($this->video_thumbnails_path.sprintf('thumb%04d.jpg',$i),$this->video_thumbnails_path.$time.'.jpg');
 			}
 			$i++;
@@ -208,7 +214,7 @@ class GifTool
 
 		$this->basename_video=pathinfo($source,PATHINFO_FILENAME);
 		try{
-			if ( ! file_exists($this->videos_source.$this->basename_video) ) {
+			if ( ! file_exists($this->videos_source.$this->source) ) {
 				throw new Exception("source file does not exist:".$this->source);
 			}
 		}
