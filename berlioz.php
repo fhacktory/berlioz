@@ -88,7 +88,7 @@ class GifTool
 	}
 
 	function to_mute() {
-		$cmd = $this->ffmpeg.$this->verbose."  -i ".$this->videos_source.$this->source."  -vf scale=320:-1 -c:v libx264 -crf 20 -an  ".$this->video_mute_path."'mute-'".$this->source;
+		$cmd = $this->ffmpeg.$this->verbose."  -i ".$this->videos_source.$this->source."  -vf scale=320:-1 -c:v libx264 -crf 20 -an  ".$this->video_mute_path."mute-".$this->source.'.mp4';
 		exec($cmd,$output,$exit);
 		if($exit != 0)
 			throw new Exception("Invalid exit code for: $cmd");
