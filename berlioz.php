@@ -91,9 +91,6 @@ class GifTool
 
 	function transparent_frame($text="",$position="bottom"){
 		$image = imagecreatetruecolor($this->infos['streams'][0]['width'], $this->infos['streams'][0]['height']);
-
-		$font = 'arial.ttf';
-
 		$fw = imagefontwidth(5);     // width of a character
 		$font_size = 24;
 		$l = strlen($text);          // number of characters
@@ -109,7 +106,7 @@ class GifTool
 
 		$xi = imagesx($image);
 	    $yi = imagesy($image);
-		$box = imagettfbbox($font_size,0,$font,$text);	
+		$box = imagettfbbox($font_size,0,$this->font,$text);	
 		$xr = abs(max($box[2], $box[4]));
 	    $x = intval(($xi - $xr) / 2);
 	    $y = $ypos - 10;
@@ -118,7 +115,7 @@ class GifTool
 
 		$white = imagecolorallocate($image, 255,255,255);
 
-		imagettftext($image, $font_size, 0, $x, $y, $white, $font, $text);
+		imagettftext($image, $font_size, 0, $x, $y, $white, $this->font, $text);
 
 		header('content-type: image/png');
 		imagepng($image,$this->videos_path.$this->basename_video."/transparent.png");
@@ -223,7 +220,6 @@ class GifTool
 			$this->verbose = "";
 	//path to ffmpeg executable
 		$this->ffmpeg=$ffmpeg;
-echo $this->videos_source.$this->source."\n";
 		$this->basename_video=pathinfo($source,PATHINFO_FILENAME);
 		try{
 			if ( ! file_exists($this->videos_source.$this->source) ) {
