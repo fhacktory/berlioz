@@ -219,7 +219,6 @@ class GifTool
 		else
 			$this->verbose = "";
 	//path to ffmpeg executable
-		$this->ffmpeg=$ffmpeg;
 		$this->basename_video=pathinfo($source,PATHINFO_FILENAME);
 		try{
 			if ( ! file_exists($this->videos_source.$this->source) ) {
