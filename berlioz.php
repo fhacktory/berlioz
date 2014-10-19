@@ -3,6 +3,7 @@
 class GifTool
 {
     protected $scale = '-vf scale="320:trunc(ow/a/2)*2"';
+    protected $scaleGif = '-vf scale="400:trunc(ow/a/2)*2"';
 
 	function help (){
 		echo "Usage: berlioz video_file operation";
@@ -33,10 +34,11 @@ class GifTool
 
 	}
 
-	function to_gif($start=25.000,$stop=30.000,$text="",$quality='low',$scale=""){
-        $id = sha1(json_encode(compact('start', 'stop', 'text', 'quality', 'scale')));
+	function to_gif($start=25.000,$stop=30.000,$text="",$quality='low') {
+        $id = sha1(json_encode(compact('start', 'stop', 'text', 'quality')));
         if(file_exists($this->video_gifs_path.$id.'.gif'))
             return $this->video_gifs_path.$id.'.gif';
+        $scale = $this->scaleGif;
 
 		if($stop < $start)
 			throw new Exception("Stop point is prior to start point");
@@ -92,7 +94,7 @@ class GifTool
 		$font = '/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans.ttf';
 
 		$fw = imagefontwidth(5);     // width of a character
-		$font_size = 36;
+		$font_size = 24;
 		$l = strlen($text);          // number of characters
 		$tw = $l*$font_size;              // text width
 		$xpos = ($this->infos['streams'][0]['width'] - $tw)/2;
