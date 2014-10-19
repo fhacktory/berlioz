@@ -168,6 +168,7 @@ class GifTool
 	//path to ffmpeg executable
 		$this->ffmpeg=$ffmpeg;
 
+		$this->basename_video=pathinfo($source,PATHINFO_FILENAME);
 		try{
 			if ( ! file_exists($this->videos_source.$this->basename_video) ) {
 				throw new Exception("source file does not exist:".$this->source);
@@ -180,7 +181,6 @@ class GifTool
 
 		$this->parse_video_info($ffprobe,$source);
 
-		$this->basename_video=pathinfo($source,PATHINFO_FILENAME);
 		$this->video_thumbnails_path=$this->videos_path.$this->basename_video.'/thumbnails/';
 		$this->video_mute_path=$this->videos_path.$this->basename_video.'/mute/';
 		$this->video_gifs_path=$this->videos_path.$this->basename_video.'/gifs/';
