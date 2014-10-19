@@ -34,6 +34,10 @@ class GifTool
 	}
 
 	function to_gif($start=25.000,$stop=30.000,$text="",$quality='low',$scale=""){
+        $id = sha1(json_encode(compact('start', 'stop', 'text', 'quality', 'scale')));
+        if(file_exists($this->video_gifs_path.$id.'.gif'))
+            return $this->video_gifs_path.$id.'.gif';
+
 		if($stop < $start)
 			throw new Exception("Stop point is prior to start point");
 		$overlay = "";
@@ -42,7 +46,6 @@ class GifTool
 			$overlay = " -i ".$this->videos_path.$this->basename_video."/transparent.png -filter_complex 'overlay=0:0' ";
 		}
 		$duration = $stop-$start;
-		$id = uniqid();
 		if($quality === 'low'){
 			$cmd=$this->ffmpeg.$this->verbose." -ss ".$start."  -i ".$this->videos_source.$this->source." ".$overlay." ".$scale." -t ".$duration." -r 10 ".$this->video_gifs_path.$id.".gif";
 			exec($cmd,$output,$exit);
@@ -81,7 +84,7 @@ class GifTool
 			if($exit != 0)
 				throw new Exception("Error Processing Request $cmd", 1);
 		}*/
-		return $id;
+		return $this->video_gifs_path.$id.'.gif';
 	}
 
 	function transparent_frame($text="",$position="bottom"){
