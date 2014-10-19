@@ -73,10 +73,10 @@ class GifTool
 				$this->transparent_frame($text);
 				$watermark = $this->videos_path.$this->basename_video."/transparent.png";
 				$watermarked_animation = $this->video_gifs_path.$id.".gif";
-				$cmd = " -delay 5 -loop 0 ".$this->video_gifs_path.$id.".gif"." -coalesce -gravity South "." -geometry +0+0 null: $watermark -layers composite -layers optimize ";
-				exec("convert $cmd $watermarked_animation ",$output,$exit); 
+				$cmd = "convert  -delay 5 -loop 0 ".$this->video_gifs_path.$id.".gif"." -coalesce -gravity South "." -geometry +0+0 null: $watermark -layers composite -layers optimize ".$watermarked_animation;
+				exec($cmd,$output,$exit); 
 				if($exit != 0)
-					throw new Exception("Error Processing Request $cmd", 1);
+					throw new Exception("Error Processing Request: $cmd ", 1);
 				}
 		}
 
@@ -87,6 +87,18 @@ class GifTool
 				throw new Exception("Error Processing Request $cmd", 1);
 		}*/
 		return $this->video_gifs_path.$id.'.gif';
+	}
+
+	function to_mp4($start=25.000,$stop=30.000,$text=""){
+		if($text != ""){
+			$this->transparent_frame($text);
+			$watermark = $this->videos_path.$this->basename_video."/transparent.png";
+		}
+		$duration = $stop-$start;
+		$cmd = $this->ffmpeg." -ss ".$start." -y  -t ".$duration." -i ".$this->videos_source.$this->source." -t ".$duration." -loop 1 -i ".$watermark." -filter_complex 'overlay=0:0' ".$this->video_frames_path.$id.".mp4";
+		exec($cmd,$output,$exit); 
+		if($exit != 0)
+			throw new Exception("Error Processing Request: $cmd ", 1);
 	}
 
 	function transparent_frame($text="",$position="bottom"){
