@@ -120,7 +120,7 @@ class GifTool
 	}
 
 	function mplayer_convert(){
-		$cmd = "mplayer -vo jpeg -sstep 5 -endpos ".round($this->infos['format']['duration'])." ".$this->videos_source.$this->source;
+		$cmd = "mplayer -vo jpeg -sstep 60 -endpos ".round($this->infos['format']['duration'])." ".$this->videos_source.$this->source;
 
         $cwd = getcwd();
         chdir($this->video_thumbnails_path);
