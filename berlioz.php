@@ -89,13 +89,18 @@ class GifTool
 		return $this->video_gifs_path.$id.'.gif';
 	}
 
-	function to_mp4($start=25.000,$stop=30.000,$text=""){
+	function to_mp4($start=25.000,$stop=30.000,$text="",$quality=""){
+        $id = sha1(json_encode(compact('start', 'stop', 'text', 'quality')));
+        $scale = '';
+        if(file_exists($this->video_gifs_path.$id.'.gif'))
+            return $this->video_gifs_path.$id.'.gif';
+
 		if($text != ""){
 			$this->transparent_frame($text);
 			$watermark = $this->videos_path.$this->basename_video."/transparent.png";
 		}
 		$duration = $stop-$start;
-		$cmd = $this->ffmpeg." -ss ".$start." -y  -t ".$duration." -i ".$this->videos_source.$this->source." -t ".$duration." -loop 1 -i ".$watermark." -filter_complex 'overlay=0:0' ".$this->video_frames_path.$id.".mp4";
+		$cmd = $this->ffmpeg." -ss ".$start." -y  -t ".$duration." -i ".$this->videos_source.$this->source." -t ".$duration." -loop 1 -i ".$watermark." -filter_complex 'overlay=0:0' -crf 32 -an ".$this->video_frames_path.$id.".mp4";
 		exec($cmd,$output,$exit); 
 		if($exit != 0)
 			throw new Exception("Error Processing Request: $cmd ", 1);
@@ -185,9 +190,6 @@ class GifTool
 			echo "error $e";
 			return 0;
 		}
-
-//		$json_raw = implode("\n", $output);
-
 		$myfile = fopen("$this->json_key_frames", "r") or die("Unable to open file!");
 		// Output one line until end-of-file
 		$i = 1;
